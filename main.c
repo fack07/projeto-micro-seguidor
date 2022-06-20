@@ -23,9 +23,9 @@ void ini_TimerA0(void){
      * clock: SMCLK/8 ~ 500 kHz
      * Fdiv: 8
      * Modo: up
-     * TA0CCR0: 62499
-     * TA0CCR1: 31249
-     * TA0CCR2: 31249
+     * TA1CCR0: 62499
+     * TA1CCR1: 31249
+     * TA1CCR2: 31249
      */
 
     TA1CTL = TASSEL1 + MC0 + ID0 + ID1;
@@ -40,21 +40,21 @@ void ini_TimerA0(void){
 
 void ini_P1_P2(void){
     /*
-     * Porta 1.x - saída nivel baixo
+     * Porta 1.x - saÃ­da nivel baixo
      *
      */
 
 
 
      /*
-     * Porta 2.x - saída nivel baixo
-     *      P2.0 - saída Standby
-     *      P2.1 - saída PWM A
-     *      P2.2 - saída A1
-     *      P2.3 - saída A2
-     *      P2.4 - saída PWM B
-     *      P2.5 - saída B1
-     *      P2.6 - saída B2
+     * Porta 2.x - saÃ­da nivel baixo
+     *      P2.0 - saÃ­da Standby
+     *      P2.1 - saÃ­da PWM A
+     *      P2.2 - saÃ­da A1
+     *      P2.3 - saÃ­da A2
+     *      P2.4 - saÃ­da PWM B
+     *      P2.5 - saÃ­da B1
+     *      P2.6 - saÃ­da B2
      */
 
 
