@@ -1,6 +1,13 @@
 #include <msp430.h> 
 
 
+#define STANDBY BIT0    // P2.0
+#define AIN1 BIT2       // Sa�da A1 P2.2
+#define AIN2 BIT3       // Sa�da A2 P2.3
+#define BIN1 BIT5       // Sa�da B1 P2.5
+#define BIN2 BIT6       // Sa�da B2 P2.6
+
+
 /**
  * main.c
  */
@@ -56,6 +63,11 @@ void ini_P1_P2(void){
      *      P2.5 - saída B1
      *      P2.6 - saída B2
      */
+    
+    P2SEL &= ~(BIT6+BIT7);                     //Bit 6 e 7 do P2 como IO
+    P2SEL |= BIT1 + BIT4; //selecionando pwma e pwmb
+    P2DIR |= BIT0+BIT1+BIT2+BIT3+BIT4+BIT5+BIT6+BIT7;   //toda a porta P2 como sa�da
+    P2OUT = 0;          //todas as sa�das em n�vel l�gico 0
 
 
 
