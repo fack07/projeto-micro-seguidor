@@ -1,12 +1,23 @@
 #include <msp430.h> 
 
-
+//Ponte H
 #define STANDBY BIT0    // P2.0
 #define AIN1 BIT2       // Sa�da A1 P2.2
 #define AIN2 BIT3       // Sa�da A2 P2.3
 #define BIN1 BIT5       // Sa�da B1 P2.5
 #define BIN2 BIT6       // Sa�da B2 P2.6
 
+//Funcoes dos motores
+void direitaFrenteTurbo(void);
+void esquerdaFrenteTurbo(void);
+void direitaFrente(void);
+void esquerdaFrente(void);
+void direitaRe(void);
+void esquerdaRe(void);
+void full_brakeD(void);
+void full_brakeE(void);
+void full_brakeTodo(void);
+void stop(void);
 
 /**
  * main.c
@@ -26,7 +37,7 @@ int main(void)
 
 void ini_TimerA0(void){
     /*
-     * TimerA0
+     * TimerA1
      * clock: SMCLK/8 ~ 500 kHz
      * Fdiv: 8
      * Modo: up
@@ -91,4 +102,87 @@ void ini_uCon(void){
     while(BCSCTL3&LFXT1OF);
     __enable_interrupt();
 
+}
+
+
+void RE(void)
+{
+        P2OUT |= AIN1;
+        P2OUT &= ~AIN2;
+        TA1CCR1 = 800;
+
+        P2OUT &= ~BIN1;
+        P2OUT |= BIN2;
+        TA1CCR2 = 800;
+}
+void direitaFrente(void)
+{
+    P2OUT |= AIN2;
+    P2OUT &= ~AIN1;
+    TA1CCR1 = 550;
+}
+
+// Motor B para frente
+void esquerdaFrente(void)
+{
+    P2OUT &= ~BIN2;
+    P2OUT |= BIN1;
+    TA1CCR2 = 550;
+}
+void direitaFrenteTurbo(void)
+{
+    P2OUT |= AIN2;
+    P2OUT &= ~AIN1;
+    TA1CCR1 = 2000;
+}
+void esquerdaFrenteTurbo(void)
+{
+    P2OUT &= ~BIN2;
+    P2OUT |= BIN1;
+    TA1CCR2 = 2000;
+}
+
+// Motor A para tras
+void direitaRe(void)
+{
+    P2OUT |= AIN1;
+    P2OUT &= ~AIN2;
+    TA1CCR1 = 550;
+}
+
+// Motor B para tras
+void esquerdaRe(void)
+{
+    P2OUT &= ~BIN1;
+    P2OUT |= BIN2;
+    TA1CCR2 = 550;
+}
+// Parar os motores, todos alto
+void full_brakeD(void)
+{
+    P2OUT &= ~AIN1;
+    P2OUT &= ~AIN2;
+}
+
+void full_brakeE(void)
+{
+    P2OUT &= ~BIN1;
+    P2OUT &= ~BIN2;
+}
+
+void full_brakeTodo(void)
+{
+    P2OUT |= BIN1;
+    P2OUT |= BIN2;
+    P2OUT |= AIN1;
+    P2OUT |= AIN2;
+}
+// Parar os motores, todos baixo
+void stop(void)
+{
+    P2OUT &= ~AIN1;
+    P2OUT &= ~AIN2;
+
+    P2OUT &= ~BIN1;
+    P2OUT &= ~BIN2;
 }
