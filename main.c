@@ -29,9 +29,34 @@ void ini_TimerA0(void);
 
 int main(void)
 {
+
     ini_uCon();
     ini_P1_P2();
     ini_TimerA0();
+    P2OUT |= BIT0;
+    unsigned long i;
+    unsigned char x=0;
+    do{
+        switch(x){
+        case 0:
+            direitaFrente();
+            break;
+        case 1:
+            esquerdaFrente();
+            break;
+        }
+       if(x==2) direitaRe();
+       if(x==3) esquerdaRe();
+       //if(x==4) full_brakeTodo();
+        //__no_operation();
+        for(i=0;i<100000;i++);
+
+        if(x<5)
+            x++;
+        else
+            x=0;
+
+    }while(1);
 
 }
 
@@ -74,10 +99,10 @@ void ini_P1_P2(void){
      *      P2.5 - saída B1
      *      P2.6 - saída B2
      */
-    
+
     P2SEL &= ~(BIT6+BIT7);                     //Bit 6 e 7 do P2 como IO
     P2SEL |= BIT1 + BIT4; //selecionando pwma e pwmb
-    P2DIR |= BIT0+BIT1+BIT2+BIT3+BIT4+BIT5+BIT6+BIT7;   //toda a porta P2 como sa�da
+    P2DIR = 0xFF;   //toda a porta P2 como sa�da
     P2OUT = 0;          //todas as sa�das em n�vel l�gico 0
 
 
@@ -119,43 +144,32 @@ void direitaFrente(void)
 {
     P2OUT |= AIN2;
     P2OUT &= ~AIN1;
-    TA1CCR1 = 550;
+    //TA1CCR1 = 550;
 }
 
 // Motor B para frente
 void esquerdaFrente(void)
 {
-    P2OUT &= ~BIN2;
-    P2OUT |= BIN1;
-    TA1CCR2 = 550;
+    P2OUT &= ~BIN1;
+    P2OUT |= BIN2;
+    //TA1CCR2 = 550;
 }
-void direitaFrenteTurbo(void)
-{
-    P2OUT |= AIN2;
-    P2OUT &= ~AIN1;
-    TA1CCR1 = 2000;
-}
-void esquerdaFrenteTurbo(void)
-{
-    P2OUT &= ~BIN2;
-    P2OUT |= BIN1;
-    TA1CCR2 = 2000;
-}
+
 
 // Motor A para tras
 void direitaRe(void)
 {
     P2OUT |= AIN1;
-    P2OUT &= ~AIN2;
-    TA1CCR1 = 550;
+   P2OUT &= ~AIN2;
+  //  TA1CCR1 = 550;
 }
 
 // Motor B para tras
 void esquerdaRe(void)
 {
-    P2OUT &= ~BIN1;
-    P2OUT |= BIN2;
-    TA1CCR2 = 550;
+    P2OUT &= ~BIN2;
+    P2OUT |= BIN1;
+  //  TA1CCR2 = 550;
 }
 // Parar os motores, todos alto
 void full_brakeD(void)
