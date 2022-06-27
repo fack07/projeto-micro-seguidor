@@ -1,7 +1,7 @@
 #include <msp430.h> 
 
 //Ponte H
-#define STANDBY BIT0    // P2.0
+#define STANDBY BIT7    // P2.7
 #define AIN1 BIT2       // Sa�da A1 P2.2
 #define AIN2 BIT3       // Sa�da A2 P2.3
 #define BIN1 BIT5       // Sa�da B1 P2.5
@@ -91,13 +91,14 @@ void ini_P1_P2(void){
 
      /*
      * Porta 2.x - saída nivel baixo
-     *      P2.0 - saída Standby
+     *      P2.0 - trigger
      *      P2.1 - saída PWM A
      *      P2.2 - saída A1
      *      P2.3 - saída A2
      *      P2.4 - saída PWM B
      *      P2.5 - saída B1
      *      P2.6 - saída B2
+     *      P2.7 - standby
      */
 
     P2SEL &= ~(BIT6+BIT7);                     //Bit 6 e 7 do P2 como IO
