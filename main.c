@@ -71,12 +71,12 @@ void ini_TimerA0(void){
      * TA1CCR2: 31249
      */
 
-    TA1CTL = TASSEL1 + MC0 + ID0 + ID1;
+    TA1CTL = TASSEL1 + MC0;
     TA1CCTL1 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
     TA1CCTL2 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
-    TA1CCR0 = 62499;
-    TA1CCR1 = 31249;
-    TA1CCR2 = 31249;
+    TA1CCR0 = 65535;
+    TA1CCR1 = 10;
+    TA1CCR2 = 32249;
 }
 
 
@@ -116,15 +116,11 @@ void ini_uCon(void){
     /* CONFIG. BCS
      * MCLK = DCOCLK ~ 1 MHz
      * SMCLK = DCOCLK ~  1 MHz
-     * ACLK = LFXT1/1 = 32768 Hz
      */
 
     DCOCTL = CALDCO_1MHZ;
     BCSCTL1 = CALBC1_1MHZ;
-    BCSCTL2 = DIVS1;
-    BCSCTL3 = XCAP0+XCAP1;
-
-    while(BCSCTL3&LFXT1OF);
+    
     __enable_interrupt();
 
 }
@@ -132,19 +128,19 @@ void ini_uCon(void){
 
 void RE(void)
 {
-        P2OUT |= AIN1;
-        P2OUT &= ~AIN2;
-        TA1CCR1 = 800;
+    P2OUT |= AIN1;
+    P2OUT &= ~AIN2;
 
-        P2OUT &= ~BIN1;
-        P2OUT |= BIN2;
-        TA1CCR2 = 800;
+
+    P2OUT &= ~BIN1;
+    P2OUT |= BIN2;
+    TA1CCR2 = 28000;
 }
 void direitaFrente(void)
 {
     P2OUT |= AIN2;
     P2OUT &= ~AIN1;
-    //TA1CCR1 = 550;
+    TA1CCR2 = 550;
 }
 
 // Motor B para frente
@@ -152,7 +148,7 @@ void esquerdaFrente(void)
 {
     P2OUT &= ~BIN1;
     P2OUT |= BIN2;
-    //TA1CCR2 = 550;
+    TA1CCR2 = 550;
 }
 
 
@@ -161,7 +157,7 @@ void direitaRe(void)
 {
     P2OUT |= AIN1;
    P2OUT &= ~AIN2;
-  //  TA1CCR1 = 550;
+   TA1CCR2 = 550;
 }
 
 // Motor B para tras
@@ -169,7 +165,7 @@ void esquerdaRe(void)
 {
     P2OUT &= ~BIN2;
     P2OUT |= BIN1;
-  //  TA1CCR2 = 550;
+    TA1CCR2 = 550;
 }
 // Parar os motores, todos alto
 void full_brakeD(void)
