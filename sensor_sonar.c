@@ -36,7 +36,7 @@ void ini_TimerA1(void){
     TA1CTL = TASSEL1 + MC0 ;  //SMCLK Up mode.
     TA1CCR0 = 65535;
     TA1CCR1 = 10;
-    TA1CCTL0 = OUTMOD0+OUTMOD1+OUTMOD2; //Reset-Set
+    TA1CCTL0 = OUTMOD0+OUTMOD1+OUTMOD2+OUT; //Reset-Set
     TA0CTL = TASSEL1 + MC1 ;  //SMCLK Cont.mode
     TA0CCTL0 = CAP + CCIE + CM0 + CM1 + SCS ; //Capture mode, interrupt enable, CCIxA, cap borda desc., sincronizar cap source.
     TA0CCTL1 = CAP + CCIE + CM0 + CM1 + SCS ;
