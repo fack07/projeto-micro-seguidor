@@ -84,6 +84,14 @@ void ini_TimerA0(void){
 void ini_P1_P2(void){
     /*
      * Porta 1.x - saída nivel baixo
+     *         P1.0 - 
+     *         P1.1 - ECHO1 
+     *         P1.2 - ECHO2
+     *         P1.3 - BOTAO
+     *         P1.4 - Sensor linha
+     *         P1.5 - Sensor linha
+     *         P1.6 - Sensor linha
+     *         P1.7 - Sensor linha
      *
      */
 
