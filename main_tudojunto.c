@@ -169,16 +169,6 @@ __interrupt void Timer_A(void){
 
 
 
-
-void TimerA0_Debounce(void){
-    TA0CTL = TASSEL1 + MC0;  //SMCLK UP mode
-    TA0CCTL0 = CCIE;
-    TA0CCR0 = 9999;
-
-    
-    
-}
-
 void TimerA0_Captura(void){
     
     TA0CTL = TASSEL1 + MC1 ;  //SMCLK Cont.mode
@@ -202,8 +192,8 @@ void TimerA1_Pwm(void){
     //TA1CCTL0 = CCIE;
     TA1CCTL1 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
     TA1CCTL2 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
-    TA1CCR0 = 39999;
-    TA1CCR1 = 4;
+    TA1CCR0 = 65535;
+    TA1CCR1 = 10;
     TA1CCR2 = 20000;
     
 }
@@ -242,11 +232,11 @@ void ini_P1_P2(void){
     P2OUT = 0;      //todas as saidas em nivel logico 0
 
 
-    P1DIR = ~(BIT4+BIT5+BIT6);      //toda a porta P1 como entrada
-    P1SEL = BIT1 + BIT2; // TA0.CCI0A  | TA0.CCI1A | TA0.1
-    P1REN = BIT4+BIT5+BIT6;   //habilita resistores de pull(up/down)
-    P1OUT = BIT4+BIT5+BIT6;   //pull UP
-    P1IE  = BIT5;   //habilita interrup��o das entradas P1
+    P1DIR = ~(BIT3+BIT4+BIT5+BIT6);      //toda a porta P1 como entrada
+    P1SEL = BIT1 + BIT2; // TA0.CCI0A  | TA0.CCI1A 
+    P1REN = BIT3+BIT4+BIT5+BIT6;   //habilita resistores de pull(up/down)
+    P1OUT = BIT3+BIT4+BIT5+BIT6;   //pull UP
+    P1IE  = BIT3 + BIT5;   //habilita interrup��o das entradas P1
     //P1IES= BIT5+BIT6+BIT7;   //a borda de descida que provoca interrup��o (descida = 1 - subida = 0)
     P1IFG = 0;      //Apaga o Flag da interrup��o de todas as entradas
 
