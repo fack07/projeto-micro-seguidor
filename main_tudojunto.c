@@ -157,16 +157,22 @@ __interrupt void Timer_A2(void){
 
 #pragma vector = TIMER0_A1_VECTOR
 __interrupt void Timer_A(void){
-        temp[i] = TA0CCR1;
-        i += 1;
-        TA0CCTL1 &= ~CCIFG ;
-        if (i==2) {
-            diff=temp[i-1]-temp[i-2];
-            i=0;
+    temp[0] = TA0CCR1;
+    //n += 1;
+    TA0CCTL1 &= ~CCIFG ;
+    if (i==1)
+    {
+        if (temp[0]<temp[1]){
+            diff=(65536-temp[1])+temp[0];
         }
+        else {
+                diff=temp[0]-temp[1];
+              }
 
+    }
+    temp[1]=temp[0];
+   i=1;
 }
-
 
 
 void TimerA0_Captura(void){
