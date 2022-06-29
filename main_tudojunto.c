@@ -47,21 +47,20 @@ int main(void)
 //-----------------------------
 
     do{
-        switch(direcao){
-            case 0:
-                if(distance <= 15)
-                    direcao = 1;
-                    fullbrake();
-                    direitafrente();
-                    esquerdafrente();
+        switch(direcao){        //verifica direcao que esta indo
+            case 0:                     //sentido frente
+                if(distance <= 15)      //verifica distancia do objeto
+                    direcao = 1;        //muda a direcao
+                    fullbrake();        
+                    direitare();
+                    esquerdare();
                 break;
             case 1:
                 if(distance2 <= 15)
                     direcao = 0;
                     fullbrake();
-                    direitare();
-                    esquerdare();
-                   
+                    direitafrente();
+                    esquerdafrente();
                 break;
         }
       
@@ -91,28 +90,28 @@ __interrupt void P1_RTI(void){
                 
     }
     
-    if(P1IFG&BIT5){
-        P1IFG &= ~BIT5;
-        while(achou!=1){
-            if(P1IN&(BIT4+BIT6)){
-                if(P1IN&BIT4){
-                    if(direcao==0){
-                        full_brakeD();
-                        while(P1IN&BIT5);
-                        direitafrente();
-                    }else{
+    if(P1IFG&BIT5){             //sensor saiu da facha branca
+        P1IFG &= ~BIT5;     //limpa flag
+        while(achou!=1){    //enquando sensores laterais não achar a faixa branca
+            if(P1IN&(BIT4+BIT6)){       //sensores laterais achou
+                if(P1IN&BIT4){          //sensor esquerdo achou
+                    if(direcao==0){         //se tiver indo para frente
+                        full_brakeD();          //para roda direita para o carro virar para direita
+                        while(P1IN&BIT5);       //???
+                        direitafrente();        //roda direita frente
+                    }else if(direcao==1){                      //sentido contrario
                         full_brakeE();
                         while(P1IN&BIT5);
                         esquerdafrente();
                     }
                 }
-                if(P1IN&BIT6){
-                    if(direcao==0){
-                        full_brakeE();
-                        while(P1IN&BIT5);
-                        esquerdafrente();
-                    }else{
-                        full_brakeD();
+                if(P1IN&BIT6){      //sensor direito achou
+                    if(direcao==0){         //se tiver indo para frente
+                        full_brakeE();      //para roda esquerda
+                        while(P1IN&BIT5);   //
+                        esquerdafrente();   //roda esquerda frente
+                    }else if(direcao==1){              //sentido contrario
+                        full_brakeD();      
                         while(P1IN&BIT5);
                         direitafrente();
                     }
