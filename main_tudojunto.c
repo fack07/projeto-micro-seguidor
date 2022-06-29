@@ -24,7 +24,12 @@ void stop(void);
 
 void ini_uCon(void);
 void ini_P1_P2(void);
-void ini_TimerA0(void);
+void TimerA1_Pwm(void);
+void TimerA0_Captura(void);
+void TimerA0_Debounce(void);
+
+
+unsigned char inicar=0, direcao=0;
 
 /*Declarações para o Sensor Sonar*/
 float diff,distance,diff2,distance2;
@@ -38,60 +43,143 @@ int main(void)
     /*Chamada das Funções*/
     ini_uCon();
     ini_P1_P2();
-    ini_TimerA0();
 
 //-----------------------------
 
-    P2OUT |= BIT0;
-    unsigned long i;
-    unsigned char x=0;
     do{
-        switch(x){
-        case 0:
-            direitaFrente();
-            break;
-        case 1:
-            esquerdaFrente();
-            break;
+        switch(direcao){
+            case 0:
+                if(diff <= 15)
+                    direcao = 1;
+                break;
+            case 1:
+                if(diff2 <= 15)
+                    direcao = 0;
+                break;
         }
-       if(x==2) direitaRe();
-       if(x==3) esquerdaRe();
-       if(x==4) full_brakeTodo();
-        __no_operation();
-        for(i=0;i<100000;i++);
-
-        if(x<5)
-            x++;
-        else
-            x=0;
 
     }while(1);
 
 }
 
-void ini_TimerA1(void){
-    /*
-     * TimerA1
-     * clock: SMCLK/8 ~ 500 kHz
-     * Fdiv: 8
-     * Modo: up
-     * TA1CCR0: 62499
-     * TA1CCR1: 10
-     * TA1CCR2: 31249
-     */
+/*RTI's*/
 
-    TA1CTL = TASSEL1 + MC0;
-    TA1CCTL1 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
-    TA1CCTL2 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
-    TA1CCR0 = 65535;
-    TA1CCR1 = 10;
-    TA1CCR2 = 32249;
+#pragma vector=PORT1_VECTOR
+__interrupt void P1_RTI(void){
+    
+    if(P1IFG&BIT3){
+        P1IE &= ~BIT3
+        TA1CCTL0 = CCIE;   
+        P1IFG &= ~BIT3;
+                
+    }
+    
+    
+    
+    
+
+    
+    
+    
+    //DESATIVA INTERRUPÇÃO, LIMPA FLAG, DISPARA DEBOUNCER
+    P1IE &= ~BIT5;
+    v = !(P1IN&BIT5);
+    P1IFG = 0;
+    P1IE |= BIT5;  
+    
+}
+
+#pragma vector = TIMER1_A0_VECTOR
+__interrupt void Timer1_A0(void){
+    TA1CCTL0 &= ~CCIE; //desabilita interrupção do timer1
+    if( (~P1IN) & BIT3 ){// Verifica se tecla realmente foi pressionada
+        if(iniciar==0){
+            direitafrente();
+            esquerddafrente();
+            iniciar=1;
+        }else{
+            fullbreake();
+            iniciar=0;
+        }
+        
+    }
+    P1IFG &= ~BIT3; // Obrigatorio limpar flag aqui!
+    P1IE |= BIT3; // Habilita int. do BIT3 da P1
+}
+
+
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt void Timer_A2(void){
+        temp0 = TA0CCR0;
+        //n += 1;
+        TA0CCTL0 &= ~CCIFG ;
+        if (n==1)
+        {
+            if (temp0<temp1){
+                diff2=(65536-temp1)+temp0;
+            }
+            else {
+                    diff2=temp0-temp1;
+                  }
+
+        }
+        temp1=temp0;
+       n=1;
+}
+
+#pragma vector = TIMER0_A1_VECTOR
+__interrupt void Timer_A(void){
+        temp[i] = TA0CCR1;
+        i += 1;
+        TA0CCTL1 &= ~CCIFG ;
+        if (i==2) {
+            diff=temp[i-1]-temp[i-2];
+            i=0;
+        }
+
+}
+
+
+
+
+void TimerA0_Debounce(void){
+    TA0CTL = TASSEL1 + MC0;  //SMCLK UP mode
+    TA0CCTL0 = CCIE;
+    TA0CCR0 = 9999;
+
+    
+    
+}
+
+void TimerA0_Captura(void){
     
     TA0CTL = TASSEL1 + MC1 ;  //SMCLK Cont.mode
     TA0CCTL0 = CAP + CCIE + CM0 + CM1 + SCS ; //Capture mode, interrupt enable, CCIxA, cap borda desc., sincronizar cap source.
     TA0CCTL1 = CAP + CCIE + CM0 + CM1 + SCS ;
     
 }
+
+void TimerA1_Pwm(void){
+    /*
+     * TimerA1
+     * clock: SMCLK/4 ~ 4MHz
+     * Fdiv: 8
+     * Modo: up
+     * TA1CCR0: 39999
+     * TA1CCR1: 4
+     * TA1CCR2: 20000
+     */
+
+    TA1CTL = TASSEL1 + MC0 + ID1;
+    //TA1CCTL0 = CCIE;
+    TA1CCTL1 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
+    TA1CCTL2 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
+    TA1CCR0 = 39999;
+    TA1CCR1 = 4;
+    TA1CCR2 = 20000;
+    
+}
+
 
 
 
@@ -145,54 +233,16 @@ void ini_uCon(void){
      * SMCLK = DCOCLK ~  1 MHz
      */
 
-    DCOCTL = CALDCO_1MHZ;
-    BCSCTL1 = CALBC1_1MHZ;
+    DCOCTL = CALDCO_16MHZ;
+    BCSCTL1 = CALBC1_16MHZ;
+    
+    
 
     __enable_interrupt();
 
 }
 
-/*RTI's*/
 
-#pragma vector=PORT1_VECTOR
-__interrupt void P1_RTI(void){
-    //DESATIVA INTERRUPÇÃO, LIMPA FLAG, DISPARA DEBOUNCER
-    P1IE &= ~BIT5;
-    v = !(P1IN&BIT5);
-    P1IFG = 0;
-    P1IE |= BIT5;
-}
-
-#pragma vector = TIMER0_A0_VECTOR
-__interrupt void Timer_A2(void){
-        temp0 = TA0CCR0;
-        //n += 1;
-        TA0CCTL0 &= ~CCIFG ;
-        if (n==1)
-        {
-            if (temp0<temp1){
-                diff2=(65536-temp1)+temp0;
-            }
-            else {
-                    diff2=temp0-temp1;
-                  }
-
-        }
-        temp1=temp0;
-       n=1;
-}
-
-#pragma vector = TIMER0_A1_VECTOR
-__interrupt void Timer_A(void){
-        temp[i] = TA0CCR1;
-        i += 1;
-        TA0CCTL1 &= ~CCIFG ;
-        if (i==2) {
-            diff=temp[i-1]-temp[i-2];
-            i=0;
-        }
-
-}
 
 /* Funções para atividades do motor*/
 
