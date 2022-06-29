@@ -69,7 +69,7 @@ int main(void)
 
 }
 
-void ini_TimerA0(void){
+void ini_TimerA1(void){
     /*
      * TimerA1
      * clock: SMCLK/8 ~ 500 kHz
@@ -86,6 +86,11 @@ void ini_TimerA0(void){
     TA1CCR0 = 65535;
     TA1CCR1 = 10;
     TA1CCR2 = 32249;
+    
+    TA0CTL = TASSEL1 + MC1 ;  //SMCLK Cont.mode
+    TA0CCTL0 = CAP + CCIE + CM0 + CM1 + SCS ; //Capture mode, interrupt enable, CCIxA, cap borda desc., sincronizar cap source.
+    TA0CCTL1 = CAP + CCIE + CM0 + CM1 + SCS ;
+    
 }
 
 
