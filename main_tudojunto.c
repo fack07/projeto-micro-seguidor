@@ -24,15 +24,14 @@ void stop(void);
 
 void ini_uCon(void);
 void ini_P1_P2(void);
-void TimerA1_Pwm(void);
-void TimerA0_Captura(void);
-void TimerA0_Debounce(void);
+void timerA0_Captura(void);
+void timerA0_Debounce(void);
 
 
-unsigned char inicar=0, direcao=0;
+unsigned char inicar=0, direcao=0, achou=0;
 
 /*Declarações para o Sensor Sonar*/
-float diff,distance,diff2,distance2;
+float diff,distance=16,diff2,distance2=16;
 int i=0,n=0,temp[2],temp0=0, temp1=0;
 //-----------------------------------------
 /*Declarações para o Sensor de Linha*/
@@ -43,22 +42,31 @@ int main(void)
     /*Chamada das Funções*/
     ini_uCon();
     ini_P1_P2();
-
+    timerA0_Captura();
+    timerA0_Debounce();
 //-----------------------------
 
     do{
         switch(direcao){
             case 0:
-                if(diff <= 15)
+                if(distance <= 15)
                     direcao = 1;
                     fullbrake();
+                    direitafrente();
+                    esquerdafrente();
                 break;
             case 1:
-                if(diff2 <= 15)
+                if(distance2 <= 15)
                     direcao = 0;
-                    
+                    fullbrake();
+                    direitare();
+                    esquerdare();
+                   
                 break;
         }
+      
+        
+        __delay_cycles(500000);  //0.5 second delay
 
     }while(1);
 
@@ -70,50 +78,49 @@ int main(void)
 __interrupt void P1_RTI(void){
     
     if(P1IFG&BIT3){
-        P1IE &= ~BIT3
-        TA1CCTL0 = CCIE;   
+
         P1IFG &= ~BIT3;
+        if(iniciar==0){
+            direitafrente();
+            esquerddafrente();
+            iniciar=1;
+        }else{
+            fullbreake();
+            iniciar=0;
+        }
                 
     }
     
     if(P1IFG&BIT5){
         P1IFG &= ~BIT5;
-        if(P1IN&(BIT4+BIT6)){
-            if(P1IN&BIT4){
-                if(direcao==0){
-                    full_brakeD();
-                    while(P1IN&BIT5);
-                    direitafrente();
-                }else{
-                    full_brakeE();
-                    while(P1IN&BIT5);
-                    esquerdafrente();
+        while(achou!=1){
+            if(P1IN&(BIT4+BIT6)){
+                if(P1IN&BIT4){
+                    if(direcao==0){
+                        full_brakeD();
+                        while(P1IN&BIT5);
+                        direitafrente();
+                    }else{
+                        full_brakeE();
+                        while(P1IN&BIT5);
+                        esquerdafrente();
+                    }
                 }
-            }
-            if(P1IN&BIT6){
-                if(direcao==0){
-                    full_brakeE();
-                    while(P1IN&BIT5);
-                    esquerdafrente();
-                }else{
-                    full_brakeD();
-                    while(P1IN&BIT5);
-                    direitafrente();
+                if(P1IN&BIT6){
+                    if(direcao==0){
+                        full_brakeE();
+                        while(P1IN&BIT5);
+                        esquerdafrente();
+                    }else{
+                        full_brakeD();
+                        while(P1IN&BIT5);
+                        direitafrente();
+                    }
                 }
+                achou=1;
             }
-            
         }
     }
-    
-
-    
-    
-    
-    //DESATIVA INTERRUPÇÃO, LIMPA FLAG, DISPARA DEBOUNCER
-    P1IE &= ~BIT5;
-    v = !(P1IN&BIT5);
-    P1IFG = 0;
-    P1IE |= BIT5;  
     
 }
 
@@ -144,15 +151,16 @@ __interrupt void Timer_A2(void){
         if (n==1)
         {
             if (temp0<temp1){
-                diff2=(65536-temp1)+temp0;
+                diff=(65536-temp1)+temp0;
             }
             else {
-                    diff2=temp0-temp1;
+                    diff=temp0-temp1;
                   }
 
         }
-        temp1=temp0;
+       temp1=temp0;
        n=1;
+      distance = diff/58;
 }
 
 #pragma vector = TIMER0_A1_VECTOR
@@ -163,19 +171,20 @@ __interrupt void Timer_A(void){
     if (i==1)
     {
         if (temp[0]<temp[1]){
-            diff=(65536-temp[1])+temp[0];
+            diff2=(65536-temp[1])+temp[0];
         }
         else {
-                diff=temp[0]-temp[1];
+                diff2=temp[0]-temp[1];
               }
 
     }
     temp[1]=temp[0];
-   i=1;
+    i=1;
+    distance2= diff2/58;
 }
 
 
-void TimerA0_Captura(void){
+void timerA0_Captura(void){
     
     TA0CTL = TASSEL1 + MC1 ;  //SMCLK Cont.mode
     TA0CCTL0 = CAP + CCIE + CM0 + CM1 + SCS ; //Capture mode, interrupt enable, CCIxA, cap borda desc., sincronizar cap source.
@@ -183,7 +192,7 @@ void TimerA0_Captura(void){
     
 }
 
-void TimerA1_Pwm(void){
+void timerA1_Pwm(void){
     /*
      * TimerA1
      * clock: SMCLK/4 ~ 4MHz
