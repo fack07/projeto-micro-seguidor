@@ -51,10 +51,12 @@ int main(void)
             case 0:
                 if(diff <= 15)
                     direcao = 1;
+                    fullbrake();
                 break;
             case 1:
                 if(diff2 <= 15)
                     direcao = 0;
+                    
                 break;
         }
 
@@ -74,8 +76,34 @@ __interrupt void P1_RTI(void){
                 
     }
     
-    
-    
+    if(P1IFG&BIT5){
+        P1IFG &= ~BIT5;
+        if(P1IN&(BIT4+BIT6)){
+            if(P1IN&BIT4){
+                if(direcao==0){
+                    full_brakeD();
+                    while(P1IN&BIT5);
+                    direitafrente();
+                }else{
+                    full_brakeE();
+                    while(P1IN&BIT5);
+                    esquerdafrente();
+                }
+            }
+            if(P1IN&BIT6){
+                if(direcao==0){
+                    full_brakeE();
+                    while(P1IN&BIT5);
+                    esquerdafrente();
+                }else{
+                    full_brakeD();
+                    while(P1IN&BIT5);
+                    direitafrente();
+                }
+            }
+            
+        }
+    }
     
 
     
@@ -186,14 +214,14 @@ void TimerA1_Pwm(void){
 void ini_P1_P2(void){
     /*
      *    Porta 1.x - saída nivel baixo
-     *         P1.0 -
+     *         P1.0 - N.C.
      *         P1.1 - ECHO1
      *         P1.2 - ECHO2
      *         P1.3 - BOTAO
-     *         P1.4 - Sensor linha FRENTE
-     *         P1.5 - Sensor linha FRENTE
-     *         P1.6 - Sensor linha TRÁS
-     *         P1.7 - Sensor linha TRÁS
+     *         P1.4 - Sensor linha ESQUERDO
+     *         P1.5 - Sensor linha MEIO
+     *         P1.6 - Sensor linha DIREITO
+     *         P1.7 - N.C.
 ------------------------------------
     * Porta P2.x - saída nivel baixo
      *      P2.0 - trigger
@@ -214,12 +242,12 @@ void ini_P1_P2(void){
     P2OUT = 0;      //todas as saidas em nivel logico 0
 
 
-    P1DIR = ~(BIT4+BIT5+BIT6+BIT7);      //toda a porta P1 como entrada
-    P1SEL = BIT1 + BIT2 + BIT6; // TA0.CCI0A  | TA0.CCI1A | TA0.1
-    P1REN = BIT4+BIT5+BIT6+BIT7;   //habilita resistores de pull(up/down)
-    P1OUT = BIT4+BIT5+BIT6+BIT7;   //pull UP
-    P1IE  = BIT4+BIT5+BIT6+BIT7;   //habilita interrup��o das entradas P1
-    P1IES= BIT4+BIT5+BIT6+BIT7;   //a borda de descida que provoca interrup��o (descida = 1 - subida = 0)
+    P1DIR = ~(BIT4+BIT5+BIT6);      //toda a porta P1 como entrada
+    P1SEL = BIT1 + BIT2; // TA0.CCI0A  | TA0.CCI1A | TA0.1
+    P1REN = BIT4+BIT5+BIT6;   //habilita resistores de pull(up/down)
+    P1OUT = BIT4+BIT5+BIT6;   //pull UP
+    P1IE  = BIT5;   //habilita interrup��o das entradas P1
+    //P1IES= BIT5+BIT6+BIT7;   //a borda de descida que provoca interrup��o (descida = 1 - subida = 0)
     P1IFG = 0;      //Apaga o Flag da interrup��o de todas as entradas
 
 }
