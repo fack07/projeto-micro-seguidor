@@ -26,19 +26,20 @@ void main(void)
 
 void iniP(void){
 
-    P2DIR = BIT0; // P1.6 como saída (trigger)
-    P2SEL = BIT0; // Timer1_A3.CCI1A
-    P1SEL = BIT1 + BIT2 + BIT6; // TA0.CCI0A  | TA0.CCI1A | TA0.1
+    P2DIR = BIT0; // P2.0 como saída (trigger)
+    P2SEL = BIT0; // TA0
+    P1SEL = BIT1 + BIT2; // TA0.CCI0A  | TA0.CCI1A 
 
 }
 
 void ini_TimerA1(void){
     TA1CTL = TASSEL1 + MC0 ;  //SMCLK Up mode.
+    TA1CCTL0 = OUTMOD0+OUTMOD1+OUTMOD2+OUT; //PWM Reset-Set
     TA1CCR0 = 65535;
     TA1CCR1 = 10;
-    TA1CCTL0 = OUTMOD0+OUTMOD1+OUTMOD2+OUT; //Reset-Set
-    TA0CTL = TASSEL1 + MC1 ;  //SMCLK Cont.mode
-    TA0CCTL0 = CAP + CCIE + CM0 + CM1 + SCS ; //Capture mode, interrupt enable, CCIxA, cap borda desc., sincronizar cap source.
+    
+    TA0CTL = TASSEL1 + MC1 ;  //SMCLK Continuo mode
+    TA0CCTL0 = CAP + CCIE + CM0 + CM1 + SCS ; //Capture mode, interrupt enable, CCIxA, cap borda subida e descida, sincronizar cap source.
     TA0CCTL1 = CAP + CCIE + CM0 + CM1 + SCS ;
 }
 void ini_uCon(void){
@@ -62,12 +63,12 @@ __interrupt void Timer_A(void){
 
 #pragma vector = TIMER0_A0_VECTOR
 __interrupt void Timer_A2(void){
-        temp0 = TA0CCR0;
+        temp0 = TA0CCR0;        //pega o tempo
         //n += 1;
         TA0CCTL0 &= ~CCIFG ;
-        if (n==1)
+        if (n==1)       
         {
-            if (temp0<temp1){
+            if (temp0<temp1){   //verifica se o tempo anterior é menor que o tempo novo
                 diff2=(65536-temp1)+temp0;
             }
             else {
@@ -75,6 +76,6 @@ __interrupt void Timer_A2(void){
                   }
 
         }
-        temp1=temp0;
+        temp1=temp0;    //coloca o tempo anterior
        n=1;
 }
