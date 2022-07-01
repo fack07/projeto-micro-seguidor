@@ -30,35 +30,35 @@ int main(void)
      }while(1);
 }
 
-#pragma vector=PORT1_VECTOR
+#pragma vector=PORT1_VECTOR //verifica interrupção da porta 1
 __interrupt void P1_RTI(void){
     //DESATIVA INTERRUPÇÃO, LIMPA FLAG, DISPARA DEBOUNCER
-    if(P1IFG&BIT3){
-        P1IE &= ~BIT3;
-        TA1CTL|=MC0;
+    if(P1IFG&BIT3){         //verifica se o botao foi precionado
+        P1IE &= ~BIT3;      //desabilita a interrupcao
+        TA1CTL|=MC0;        //inicia o contador do debounce
 
-    }
-    if(P1IFG&BIT5){
-        P1IE &= ~BIT5;
-        while(achou!=1){
-            if((~P1IN)&BIT4){
-                if(direcao==0){
-                    P2OUT &= ~(BIN1+BIN2);
-                    while(P1IN&BIT5);
-                    P2OUT|=BIN2;
-                }else if(direcao==1){
-                    P2OUT &= ~(AIN1+AIN2);
-                    while(P1IN&BIT5);
-                    P2OUT|=AIN1;
+    }   
+    if(P1IFG&BIT5){     // verifica se o sensor do meio foi acionado
+        P1IE &= ~BIT5;  
+        while(achou!=1){    //fica verificando enquanto os sensores laterais não acha a faixa
+            if((~P1IN)&BIT4){   //se o sensor esquerdo achou a faixa
+                if(direcao==0){     //se o sentido for para frente
+                    P2OUT &= ~(BIN1+BIN2);      //para a roda esquerda
+                    while(P1IN&BIT5);           //enquanto o sensor do meio não achar
+                    P2OUT|=BIN2;            //habilita a roda esquerda
+                }else if(direcao==1){   //se o sentido for para tras
+                    P2OUT &= ~(AIN1+AIN2);      //para a roda direita
+                    while(P1IN&BIT5);           //enquanto o sensor do meio não achar
+                    P2OUT|=AIN1;            //habilita a roda direita
                 }
                 achou=1;
-            }else if((~P1IN)&BIT1){
-                if(direcao==0){
-                    P2OUT &= ~(AIN1+AIN2);
+            }else if((~P1IN)&BIT1){     //se o sensor direito achou a faixa
+                if(direcao==0){         //se o sentido for para frente
+                    P2OUT &= ~(AIN1+AIN2);      //para a roda direita
                     while(P1IN&BIT5);
                     P2OUT|=AIN2;
-                }else if(direcao==1){
-                    P2OUT &= ~(BIN1+BIN2);
+                }else if(direcao==1){    //se o sentido for para tras
+                    P2OUT &= ~(BIN1+BIN2);  //para a roda esquerda
                     while(P1IN&BIT5);
                     P2OUT|=BIN1;
                 }
@@ -73,23 +73,23 @@ __interrupt void P1_RTI(void){
 
 }
 
-#pragma vector=TIMER1_A0_VECTOR
+#pragma vector=TIMER1_A0_VECTOR     //interrupcao do TimerA1
 __interrupt void RTI_do_Timer0(void){
     //parar o timer1
     TA1CTL &= ~MC0;
     //verificar chave
     if(P1IFG & BIT3){
-        if((P1IN) & BIT3){
-            if(ligado==0){
-                P2OUT |= (STANDBY+AIN1+BIN1);
-                ligado=1;
+        if((P1IN) & BIT3){      //se a chave foi pressionada
+            if(ligado==0){          //se nao estiver ligado
+                P2OUT |= (STANDBY+AIN1+BIN1);           //ativa a PonteH e liga os motores para frente
+                ligado=1;   //muda o estado de ligado
             // entrou =0;
-            }else if(ligado==1){
-                P2OUT &= ~STANDBY;
-                ligado=0;
+            }else if(ligado==1){        //se estiver ligado
+                P2OUT &= ~STANDBY;      //desabilita a PonteH
+                ligado=0;       //muda o estado de ligado
             }
         }
-        P1IFG &= ~BIT3; //limpar flag
+        P1IFG &= ~BIT3; //limpar flag   
         P1IE |= BIT3;   //ativar interrupcao
     }
 }
@@ -126,7 +126,7 @@ void ini_TimerA0(void){
      * TA1CCR2: 31249
      */
 
-    TA0CTL = TASSEL1 + MC0 + ID0 + ID1;
+    TA0CTL = TASSEL1 + MC0 + ID0 + ID1;         
     TA0CCTL1 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
     //TA0CCTL2 = OUTMOD0 + OUTMOD1 + OUTMOD2 + OUT;
     TA0CCR0 = 2000;
