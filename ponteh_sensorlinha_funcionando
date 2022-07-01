@@ -95,10 +95,33 @@ __interrupt void RTI_do_Timer0(void){
 }
 
 
+
 void  iniP(void){
 
-    P1SEL = BIT2+BIT6;
-    P1DIR = ~(BIT5+BIT4+BIT3+BIT1);      //toda a porta P1 como entrada
+    /*
+     *    Porta 1.x - saída nivel baixo
+     *         P1.0 - N.C.
+     *         P1.1 - Sensor direito
+     *         P1.2 - PWM A
+     *         P1.3 - BOTAO
+     *         P1.4 - Sensor linha ESQUERDO
+     *         P1.5 - Sensor linha MEIO
+     *         P1.6 - PWM B
+     *         P1.7 - N.C.
+------------------------------------
+    * Porta P2.x - saída nivel baixo
+     *      P2.0 - N.C
+     *      P2.1 - N.C
+     *      P2.2 - saída A1
+     *      P2.3 - saída A2
+     *      P2.4 - N.C
+     *      P2.5 - saída B1
+     *      P2.6 - saída B2
+     *      P2.7 - standby
+     */
+
+    P1SEL = BIT2+BIT6;          //mudando a função para pwm
+    P1DIR = ~(BIT5+BIT4+BIT3+BIT1);      //setando as porta P1 como entrada
     P1REN = BIT5+BIT4+BIT3+BIT1;   //habilita resistores de pull(up/down)
     P1OUT = BIT5+BIT4+BIT3+BIT1;   //pull UP
     P1IE  = BIT3+BIT5;   //habilita interrup��o das entradas P1
@@ -106,7 +129,7 @@ void  iniP(void){
 
     P1IFG = 0;          //Apaga o Flag da interrup��o de todas as entradas
 
-    P2SEL &= ~(BIT6+BIT7); //selecionando pwma e pwmb
+    P2SEL &= ~(BIT6+BIT7); //mudando I/O
     P2DIR = 0xFF;   //toda a porta P2 como sa�da
     P2OUT = 0;          //todas as sa�das em n�vel l�gico 0
 
