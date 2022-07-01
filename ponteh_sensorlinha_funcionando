@@ -137,7 +137,7 @@ void ini_TimerA0(void){
 
 void ini_TimerA1(void){
     /*
-     *tempo debouncer: 2ms
+     *tempo debouncer: 20ms
      *
      * CONTADOR
      *      - Clock: SMCLK ~250khz
